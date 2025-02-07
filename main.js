@@ -11,7 +11,18 @@ import {
   Mesh,
   MeshNormalMaterial,
   AmbientLight,
-  Clock
+  SphereGeometry,
+  Clock,
+  MeshPhongMaterial,
+  PointLight,
+  Object3D,
+  GridHelper,
+  BackSide,
+  TextureLoader,
+  MeshLambertMaterial,
+  Vector2,
+  Raycaster,
+  CylinderGeometry
 } from 'three';
 
 // If you prefer to import the whole library, with the THREE prefix, use the following line instead:
@@ -40,12 +51,44 @@ import {
 import {
   GLTFLoader
 } from 'three/addons/loaders/GLTFLoader.js';
+import { pass } from 'three/src/nodes/TSL.js';
 
 // Example of hard link to official repo for data, if needed
 // const MODEL_PATH = 'https://raw.githubusercontent.com/mrdoob/three.js/r173/examples/models/gltf/LeePerrySmith/LeePerrySmith.glb';
 
 
 // INSERT CODE HERE
+
+const mouse = new Vector2(1, 1);
+const raycaster = new Raycaster();
+
+let speed_ball_x = 0.08;
+let speed_ball_y = 0.08;
+let speed_ball_z = 0.06;
+const ball_size = 0.1;
+const raquet_size_x = 0.7;
+const raquet_size_y = 0.7;
+let score = 0;
+
+const texture = new TextureLoader().load("assets/models/space_image.jpg");
+
+
+
+
+const radius = 1;
+const widthSegments = 6;
+const heightSegments = 6;
+const sphereGeometry = new SphereGeometry(
+  radius, widthSegments, heightSegments);
+
+const radiustop = 5;
+const radiusbottom = 5;
+const height_disk = 0.1;
+const radius_seg = 36;
+
+const cylinderGeometry = new CylinderGeometry(
+  radiustop, radiusbottom, height_disk, radius_seg);
+
 
 const scene = new Scene();
 const aspect = window.innerWidth / window.innerHeight;
@@ -61,18 +104,62 @@ document.body.appendChild(renderer.domElement);
 const controls = new OrbitControls(camera, renderer.domElement);
 controls.listenToKeyEvents(window); // optional
 
-const geometry = new BoxGeometry(1, 1, 1);
-const material = new MeshNormalMaterial();
-const cube = new Mesh(geometry, material);
+const space_boxgeometry = new BoxGeometry(5, 5, 5);
+const space_box_material = new MeshLambertMaterial({ side: BackSide, map: texture });
+const space_box = new Mesh(space_boxgeometry, space_box_material);
 
-scene.add(cube);
+const raquet_boxgeometry = new BoxGeometry(1, 1, 0.1);
+const raquet_box_material = new MeshLambertMaterial();
+const raquet = new Mesh(raquet_boxgeometry, raquet_box_material);
+raquet.position.z = 1.5
+
+
+/** 
+const size = 10;
+const divisions = 10;
+
+const gridHelper = new GridHelper(size, divisions);
+scene.add(gridHelper);
+**/
+
+
+const ball_material = new MeshNormalMaterial();
+const ball = new Mesh(sphereGeometry, ball_material)
+ball.scale.set(0.2, 0.2, 0.2);
+
+
+
+const target_material = new MeshNormalMaterial();
+const target = new Mesh(cylinderGeometry, target_material);
+target.scale.set(0.05, 0.05, 0.05);
+target.rotateX(Math.PI / 2);
+target.position.z = -2.499;
+
+
+
+scene.add(space_box);
+scene.add(ball);
+scene.add(raquet);
+scene.add(target);
+
+ball.position.x = 0.2;
+ball.position.y = 0.2;
+ball.position.z = 0.2;
+
+function create_target() {
+  pass;
+}
+function hide_target() {
+  target.position.z = -3;
+}
+
+
 
 function loadData() {
   new GLTFLoader()
     .setPath('assets/models/')
     .load('test.glb', gltfReader);
 }
-
 
 function gltfReader(gltf) {
   let testModel = null;
@@ -87,7 +174,7 @@ function gltfReader(gltf) {
   }
 }
 
-loadData();
+//loadData();
 
 
 camera.position.z = 3;
@@ -99,21 +186,73 @@ const clock = new Clock();
 const animation = () => {
 
   renderer.setAnimationLoop(animation); // requestAnimationFrame() replacement, compatible with XR 
+  controls.update();
 
   const delta = clock.getDelta();
   const elapsed = clock.getElapsedTime();
-
   // can be used in shaders: uniforms.u_time.value = elapsed;
 
-  cube.rotation.x = elapsed / 2;
-  cube.rotation.y = elapsed / 1;
+
+
+  raycaster.setFromCamera(mouse, camera);
+
+  const intersection = raycaster.intersectObject(space_box);
+  if (intersection[0]) {
+    raquet.position.x = intersection[0].point.x
+    raquet.position.y = intersection[0].point.y
+    //raquet.position.z = intersection[0].point.z
+
+  }
+  //ball maj pos
+  ball.position.x = ball.position.x + speed_ball_x;
+  ball.position.y = ball.position.y + speed_ball_y;
+  ball.position.z = ball.position.z + speed_ball_z;
+
+  //ball raquet col
+  const is_in_x = ball.position.x + ball_size < raquet.position.x + raquet_size_x && ball.position.x - ball_size > raquet.position.x - raquet_size_x;
+  const is_in_y = ball.position.y + ball_size < raquet.position.y + raquet_size_y && ball.position.y - ball_size > raquet.position.y - raquet_size_y;
+
+  if (is_in_x && is_in_y && Math.abs(Math.abs(ball.position.z) - Math.abs(raquet.position.z)) < 0.2) {
+    speed_ball_z = - speed_ball_z
+  }
+
+
+  //rebondir
+
+  if (ball.position.x + ball_size > 2.5 || ball.position.x - ball_size < -2.5) {
+    speed_ball_x = - speed_ball_x
+  }
+  if (ball.position.y + ball_size > 2.5 || ball.position.y - ball_size < -2.5) {
+    speed_ball_y = - speed_ball_y
+  }
+  if (ball.position.z + ball_size > 2.5 || ball.position.z - ball_size < -2.5) {
+    speed_ball_z = - speed_ball_z
+  }
+
+  if (Math.abs(ball.position.x - target.position.x) < ball_size && Math.abs(ball.position.y - target.position.y) < ball_size && Math.abs(ball.position.z - raquet.position.z) < 0.1) {
+    hide_target();
+  }
+
+
+  //cube.rotation.x = elapsed / 2;
+  //cube.rotation.y = elapsed / 1;
 
   renderer.render(scene, camera);
 };
+function onMouseMove(event) {
+
+  event.preventDefault();
+
+  mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+  mouse.y = - (event.clientY / window.innerHeight) * 2 + 1;
+
+}
 
 animation();
 
+
 window.addEventListener('resize', onWindowResize, false);
+document.addEventListener('mousemove', onMouseMove);
 
 function onWindowResize() {
 
