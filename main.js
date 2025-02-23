@@ -54,11 +54,24 @@ import {
 } from 'three/addons/loaders/GLTFLoader.js';
 import { pass } from 'three/src/nodes/TSL.js';
 
+import {ZZFX, zzfx} from './ZzFX-master/ZzFX.js'
+
 // Example of hard link to official repo for data, if needed
 // const MODEL_PATH = 'https://raw.githubusercontent.com/mrdoob/three.js/r173/examples/models/gltf/LeePerrySmith/LeePerrySmith.glb';
 
 
 // INSERT CODE HERE
+
+let audioContext = null;
+let audioInitialized = false;
+
+const initAudio = () => {
+  if (!audioInitialized) {
+    audioContext = new (window.AudioContext || window.webkitAudioContext)();
+    audioInitialized = true;
+  }
+};
+
 
 const mouse = new Vector2(1, 1);
 const raycaster = new Raycaster();
@@ -79,7 +92,7 @@ const borderTexture = new TextureLoader().load("./assets/models/kenney_fantasy-u
 // Création du conteneur pour le score avec le style Kenney fantasy UI
 const scoreContainer = document.createElement('div');
 scoreContainer.style.position = 'absolute';
-scoreContainer.style.top = '10px';
+scoreContainer.style.top = '20px';
 scoreContainer.style.left = '10px';
 scoreContainer.style.width = '100px';
 scoreContainer.style.height = '70px';
@@ -102,6 +115,8 @@ scoreDiv.style.padding = '0 7px';
 scoreDiv.style.textShadow = '1px 1px 2px black';
 scoreDiv.textContent = 'Score: 0';
 scoreContainer.appendChild(scoreDiv);
+
+
 
 
 const radius = 1;
@@ -207,6 +222,20 @@ function updateScoreDisplay() {
 }
 
 
+function playBounceSound() {
+  if (audioInitialized) {
+    zzfx(...[1,,200,,.05,.2,4,2,,.5,,,,,,6,,.1,.01]); 
+  }
+}
+window.addEventListener('click', initAudio);
+window.addEventListener('keydown', initAudio);
+window.addEventListener('touchstart', initAudio);
+
+
+
+
+
+
 function loadData() {
   new GLTFLoader()
     .setPath('assets/models/')
@@ -272,13 +301,16 @@ const animation = () => {
   //rebondir
 
   if (ball.position.x + ball_size > 2.5 || ball.position.x - ball_size < -2.5) {
-    speed_ball_x = - speed_ball_x
+    speed_ball_x = - speed_ball_x;
+    playBounceSound();
   }
   if (ball.position.y + ball_size > 2.5 || ball.position.y - ball_size < -2.5) {
-    speed_ball_y = - speed_ball_y
+    speed_ball_y = - speed_ball_y;
+    playBounceSound();
   }
   if (ball.position.z + ball_size > 2.5 || ball.position.z - ball_size < -2.5) {
-    speed_ball_z = - speed_ball_z
+    speed_ball_z = - speed_ball_z;
+    playBounceSound();
   }
 
   // Collision balle-cible améliorée
@@ -304,12 +336,14 @@ function onMouseMove(event) {
 
   event.preventDefault();
 
+
   mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
   mouse.y = - (event.clientY / window.innerHeight) * 2 + 1;
 
 }
 
 animation();
+
 
 
 window.addEventListener('resize', onWindowResize, false);

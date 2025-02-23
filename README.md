@@ -1,3 +1,22 @@
+Space Pong 3D
+Description du projet
+Space Pong 3D est une réinvention moderne du jeu classique Pong, transporté dans un environnement 3D spatial. Le jeu combine les mécaniques traditionnelles du ping-pong avec un twist futuriste, où les joueurs doivent frapper une balle dans un environnement spatial en utilisant une raquette contrôlée par la souris.
+
+But du projet
+
+Créer un jeu sympa en ajoutant diférentes fonctionnalité vu au cours du projet telle que :
+
+-gestion d'événement
+-ajout texture
+-gestion de déplacement d'objet dans l'espace
+-gestion du son
+
+
+
+
+
+
+
 # three_vite
 Basic THREE.js template using [Vite](https://vitejs.dev).
 
