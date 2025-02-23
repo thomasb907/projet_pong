@@ -22,7 +22,8 @@ import {
   MeshLambertMaterial,
   Vector2,
   Raycaster,
-  CylinderGeometry
+  CylinderGeometry,
+  Vector3
 } from 'three';
 
 // If you prefer to import the whole library, with the THREE prefix, use the following line instead:
@@ -69,10 +70,38 @@ const ball_size = 0.1;
 const raquet_size_x = 0.7;
 const raquet_size_y = 0.7;
 let score = 0;
+let targetVisible = true;
+let targetRespawnTimeout = null;
 
-const texture = new TextureLoader().load("assets/models/space_image.jpg");
+const texture = new TextureLoader().load("./assets/models/space_image.jpg");
+const borderTexture = new TextureLoader().load("./assets/models/kenney_fantasy-ui-borders/PNG/Double/Border/panel-border-002.png");
 
+// Création du conteneur pour le score avec le style Kenney fantasy UI
+const scoreContainer = document.createElement('div');
+scoreContainer.style.position = 'absolute';
+scoreContainer.style.top = '10px';
+scoreContainer.style.left = '10px';
+scoreContainer.style.width = '100px';
+scoreContainer.style.height = '70px';
+scoreContainer.style.backgroundImage = `url('./assets/models/kenney_fantasy-ui-borders/PNG/Double/Border/panel-border-002.png')`;
+scoreContainer.style.backgroundSize = 'contain';
+scoreContainer.style.backgroundRepeat = 'no-repeat';
+scoreContainer.style.display = 'flex';
+scoreContainer.style.justifyContent = 'left';
+scoreContainer.style.alignItems = 'center';
+scoreContainer.style.backgroundSize = '100% 100%';
+document.body.appendChild(scoreContainer);
 
+// Création du texte du score
+const scoreDiv = document.createElement('div');
+scoreDiv.style.color = 'white';
+scoreDiv.style.fontFamily = 'Arial, sans-serif';
+scoreDiv.style.fontSize = '17px';
+scoreDiv.style.fontWeight = 'bold';
+scoreDiv.style.padding = '0 7px';
+scoreDiv.style.textShadow = '1px 1px 2px black';
+scoreDiv.textContent = 'Score: 0';
+scoreContainer.appendChild(scoreDiv);
 
 
 const radius = 1;
@@ -147,12 +176,35 @@ ball.position.y = 0.2;
 ball.position.z = 0.2;
 
 function create_target() {
-  pass;
-}
-function hide_target() {
-  target.position.z = -3;
+  // Générer une position aléatoire pour la cible
+  const x = (Math.random() - 0.5) * 4;
+  const y = (Math.random() - 0.5) * 4;
+  
+  target.position.x = x;
+  target.position.y = y;
+  target.position.z = -2.499; // Positionnement sur la paroi arrière
+  
+  targetVisible = true;
 }
 
+function hide_target() {
+  target.position.z = -3;
+  targetVisible = false;
+  
+  // Programmer la réapparition de la cible après 3 secondes
+  clearTimeout(targetRespawnTimeout);
+  targetRespawnTimeout = setTimeout(() => {
+    create_target();
+  }, 3000);
+  
+  // Augmenter le score
+  score += 10;
+  updateScoreDisplay();
+}
+
+function updateScoreDisplay() {
+  scoreDiv.textContent = `Score: ${score}`;
+}
 
 
 function loadData() {
@@ -229,8 +281,17 @@ const animation = () => {
     speed_ball_z = - speed_ball_z
   }
 
-  if (Math.abs(ball.position.x - target.position.x) < ball_size && Math.abs(ball.position.y - target.position.y) < ball_size && Math.abs(ball.position.z - raquet.position.z) < 0.1) {
-    hide_target();
+  // Collision balle-cible améliorée
+  if (targetVisible) {
+    const ballToTarget = new Vector3(
+      ball.position.x - target.position.x,
+      ball.position.y - target.position.y,
+      ball.position.z - target.position.z
+    );
+    
+    if (ballToTarget.length() < ball_size + 0.25) {
+      hide_target();
+    }
   }
 
 
