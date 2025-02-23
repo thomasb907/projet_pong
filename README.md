@@ -6,10 +6,10 @@ But du projet
 
 Créer un jeu sympa en ajoutant diférentes fonctionnalité vu au cours du projet telle que :
 
--gestion d'événement
--ajout texture
--gestion de déplacement d'objet dans l'espace
--gestion du son
+- gestion d'événement
+- ajout texture
+- gestion de déplacement d'objet dans l'espace
+- gestion du son
 
 
 
