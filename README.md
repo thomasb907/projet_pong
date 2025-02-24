@@ -15,7 +15,7 @@ Lien du site sur git :
  - https://thomasb907.github.io/projet_pong/
 
 Lien de la video 
- - [Regarder la vidéo](./2025-02-24_02-41-25.mp4)
+ - [Regarder la vidéo](./2025-02-24_02-41-25.mp4) (Video dans le repertoire)
 
 
 
