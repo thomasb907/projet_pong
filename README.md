@@ -13,7 +13,9 @@ Créer un jeu sympa en ajoutant diférentes fonctionnalité vu au cours du proje
 
 Lien du site sur git : 
  - https://thomasb907.github.io/projet_pong/
-[Regarder la vidéo](./2025-02-24_02-41-25.mp4)
+
+Lien de la video 
+ - [Regarder la vidéo](./2025-02-24_02-41-25.mp4)
 
 
 
