@@ -11,7 +11,8 @@ Créer un jeu sympa en ajoutant diférentes fonctionnalité vu au cours du proje
 - gestion de déplacement d'objet dans l'espace
 - gestion du son
 
-
+Lien du site sur git : 
+ - https://thomasb907.github.io/projet_pong/
 
 
 
